@@ -1,0 +1,90 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">LocalPlayer</string>
+
+    <!-- Навигация -->
+    <string name="nav_library">Библиотека</string>
+    <string name="nav_playlists">Плейлисты</string>
+    <string name="nav_search">Поиск</string>
+    <string name="settings">Настройки</string>
+    <string name="back">Назад</string>
+
+    <!-- Разрешение -->
+    <string name="permission_title">Доступ к музыке</string>
+    <string name="permission_text">LocalPlayer воспроизводит музыку, которая уже лежит на устройстве. Чтобы найти её, приложению нужен доступ к аудиофайлам. Ничего не отправляется в интернет — у приложения даже нет такого разрешения.</string>
+    <string name="permission_notifications_hint">Ещё попросим разрешение на уведомления — в них будут кнопки управления воспроизведением.</string>
+    <string name="permission_grant">Разрешить</string>
+    <string name="permission_denied">Без доступа к аудиофайлам приложение не сможет найти музыку. Разрешение можно выдать в настройках системы.</string>
+    <string name="permission_open_settings">Открыть настройки</string>
+
+    <!-- Пустые экраны-заглушки -->
+    <string name="screen_in_progress">Экран в разработке</string>
+
+    <!-- Библиотека -->
+    <string name="tab_tracks">Треки</string>
+    <string name="tab_albums">Альбомы</string>
+    <string name="tab_artists">Исполнители</string>
+    <string name="tab_folders">Папки</string>
+    <string name="unknown_artist">Неизвестный исполнитель</string>
+    <string name="unknown_album">Неизвестный альбом</string>
+    <string name="empty_library_title">Музыка не найдена</string>
+    <string name="empty_library_hint">Скопируйте аудиофайлы в память устройства (например, в папку Music) — они появятся здесь автоматически. Треки короче порога из настроек скрыты.</string>
+    <string name="action_sort">Сортировка</string>
+    <string name="action_play">Играть</string>
+    <string name="action_shuffle">Перемешать</string>
+    <string name="sort_title">Сортировка треков</string>
+    <string name="sort_by_title">По названию</string>
+    <string name="sort_by_artist">По исполнителю</string>
+    <string name="sort_by_album">По альбому</string>
+    <string name="sort_by_date">По дате добавления</string>
+    <string name="sort_by_duration">По длительности</string>
+    <string name="sort_ascending">По возрастанию</string>
+    <string name="sort_descending">По убыванию</string>
+    <string name="done">Готово</string>
+    <string name="cancel">Отмена</string>
+    <string name="ok">ОК</string>
+    <string name="not_found_title">Ничего не найдено</string>
+    <string name="item_not_found_hint">Возможно, файлы были удалены или перемещены.</string>
+    <string name="album_info">%1$s · %2$s</string>
+
+    <plurals name="tracks_count">
+        <item quantity="one">%d трек</item>
+        <item quantity="few">%d трека</item>
+        <item quantity="many">%d треков</item>
+        <item quantity="other">%d трека</item>
+    </plurals>
+    <plurals name="albums_count">
+        <item quantity="one">%d альбом</item>
+        <item quantity="few">%d альбома</item>
+        <item quantity="many">%d альбомов</item>
+        <item quantity="other">%d альбома</item>
+    </plurals>
+
+    <!-- Поиск -->
+    <string name="search_hint">Треки, альбомы, исполнители</string>
+    <string name="search_clear">Очистить</string>
+    <string name="search_start_title">Поиск по библиотеке</string>
+    <string name="search_start_hint">Ищите по названию, исполнителю или альбому.</string>
+    <string name="search_not_found_hint">Попробуйте другой запрос.</string>
+
+    <!-- Плеер -->
+    <string name="player_play">Играть</string>
+    <string name="player_pause">Пауза</string>
+    <string name="player_next">Следующий трек</string>
+    <string name="player_previous">Предыдущий трек</string>
+    <string name="player_collapse">Свернуть плеер</string>
+    <string name="player_now_playing">Сейчас играет</string>
+    <string name="player_queue">Очередь</string>
+    <string name="player_shuffle_on">Включить перемешивание</string>
+    <string name="player_shuffle_off">Выключить перемешивание</string>
+    <string name="player_repeat_off">Повтор выключен</string>
+    <string name="player_repeat_all">Повтор очереди</string>
+    <string name="player_repeat_one">Повтор трека</string>
+    <string name="player_error">Не удалось воспроизвести «%1$s» — файл недоступен или повреждён</string>
+    <string name="player_error_untitled">Не удалось воспроизвести трек — файл недоступен или повреждён</string>
+    <string name="queue_shuffle_hint">Включено перемешивание: показан порядок воспроизведения, перетаскивание недоступно.</string>
+    <string name="queue_drag">Перетащить</string>
+    <string name="favorite_add">Добавить в избранное</string>
+    <string name="favorite_remove">Убрать из избранного</string>
+    <string name="sleep_timer">Таймер сна</string>
+</resources>

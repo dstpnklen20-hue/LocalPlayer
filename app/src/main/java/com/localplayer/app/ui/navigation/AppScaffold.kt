@@ -52,6 +52,8 @@ import com.localplayer.app.ui.components.MiniPlayer
 import com.localplayer.app.ui.screens.player.FullPlayer
 import com.localplayer.app.ui.screens.player.PlayerExtras
 import com.localplayer.app.ui.screens.player.PlayerViewModel
+import com.localplayer.app.ui.screens.player.SleepTimerDialog
+import com.localplayer.app.ui.screens.player.sleepTimerLabel
 import com.localplayer.app.ui.screens.queue.QueueSheet
 
 /** Ширина ≥ 600 dp (планшет, альбомная ориентация) — NavigationRail вместо нижней панели. */
@@ -74,8 +76,10 @@ fun AppScaffold(playerViewModel: PlayerViewModel = hiltViewModel()) {
     val position by playerViewModel.position.collectAsStateWithLifecycle(0L)
     var playerExpanded by rememberSaveable { mutableStateOf(false) }
     var queueVisible by rememberSaveable { mutableStateOf(false) }
+    var sleepDialogVisible by rememberSaveable { mutableStateOf(false) }
     val snackbarHostState = remember { SnackbarHostState() }
     val isFavorite by playerViewModel.isFavorite.collectAsStateWithLifecycle()
+    val sleepTimer by playerViewModel.sleepTimerState.collectAsStateWithLifecycle()
 
     LaunchedEffect(playerViewModel) {
         playerViewModel.errors.collect { event ->
@@ -177,10 +181,22 @@ fun AppScaffold(playerViewModel: PlayerViewModel = hiltViewModel()) {
                         extras = PlayerExtras(
                             isFavorite = isFavorite,
                             onToggleFavorite = playerViewModel::toggleFavorite,
+                            sleepTimerLabel = if (sleepTimer.active) sleepTimerLabel(sleepTimer) else null,
+                            onSleepTimer = { sleepDialogVisible = true },
                         ),
                     )
                 }
             }
+        }
+
+        if (sleepDialogVisible) {
+            SleepTimerDialog(
+                state = sleepTimer,
+                onSelectMinutes = playerViewModel::startSleepTimer,
+                onSelectEndOfTrack = playerViewModel::startSleepTimerEndOfTrack,
+                onCancelTimer = playerViewModel::cancelSleepTimer,
+                onDismiss = { sleepDialogVisible = false },
+            )
         }
 
         if (queueVisible && playerState.hasMedia) {

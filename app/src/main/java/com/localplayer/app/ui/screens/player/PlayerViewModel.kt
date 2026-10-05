@@ -7,6 +7,8 @@ import com.localplayer.app.data.model.Track
 import com.localplayer.app.playback.PlaybackErrorEvent
 import com.localplayer.app.playback.PlayerConnection
 import com.localplayer.app.playback.PlayerState
+import com.localplayer.app.playback.SleepTimer
+import com.localplayer.app.playback.SleepTimerState
 import com.localplayer.app.ui.components.PlaybackActions
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -28,6 +30,7 @@ import javax.inject.Inject
 class PlayerViewModel @Inject constructor(
     private val connection: PlayerConnection,
     private val playlistRepository: PlaylistRepository,
+    private val sleepTimer: SleepTimer,
 ) : ViewModel(), PlaybackActions {
 
     val state: StateFlow<PlayerState> = connection.state
@@ -57,6 +60,12 @@ class PlayerViewModel @Inject constructor(
     fun skipTo(windowIndex: Int) = connection.skipToQueueItem(windowIndex)
     fun removeFromQueue(windowIndex: Int) = connection.removeQueueItem(windowIndex)
     fun moveInQueue(from: Int, to: Int) = connection.moveQueueItem(from, to)
+
+    val sleepTimerState: StateFlow<SleepTimerState> = sleepTimer.state
+
+    fun startSleepTimer(minutes: Int) = sleepTimer.start(minutes)
+    fun startSleepTimerEndOfTrack() = sleepTimer.startEndOfTrack()
+    fun cancelSleepTimer() = sleepTimer.cancel()
 
     fun toggleFavorite() {
         val id = state.value.currentTrackId ?: return

@@ -152,4 +152,44 @@
     <string name="most_played_empty_hint">Трек попадает сюда, когда прослушан хотя бы наполовину.</string>
     <string name="track_unavailable">Файл недоступен</string>
     <string name="track_unavailable_hint">Удалён или перемещён</string>
+
+    <!-- Таймер сна -->
+    <string name="sleep_timer_end_of_track">До конца трека</string>
+    <string name="sleep_timer_end_of_track_short">до конца трека</string>
+    <string name="sleep_timer_active">Музыка остановится: %1$s</string>
+    <string name="sleep_timer_off">Выключить таймер</string>
+    <plurals name="minutes">
+        <item quantity="one">%d минута</item>
+        <item quantity="few">%d минуты</item>
+        <item quantity="many">%d минут</item>
+        <item quantity="other">%d минуты</item>
+    </plurals>
+
+    <!-- Настройки -->
+    <string name="settings_appearance">Оформление</string>
+    <string name="theme_system">Как в системе</string>
+    <string name="theme_light">Светлая</string>
+    <string name="theme_dark">Тёмная</string>
+    <string name="settings_dynamic_color">Динамические цвета</string>
+    <string name="settings_dynamic_color_hint">Цвета приложения подстраиваются под обои (Material You)</string>
+    <string name="settings_library">Библиотека</string>
+    <string name="settings_min_duration">Скрывать короткие файлы</string>
+    <string name="settings_min_duration_value">Короче %d с — звонки, голосовые сообщения</string>
+    <string name="settings_min_duration_off">Показывать все файлы</string>
+    <string name="settings_excluded_folders">Исключённые папки</string>
+    <string name="settings_excluded_folders_hint">Музыка из этих папок не попадёт в библиотеку</string>
+    <string name="settings_add_folder">Исключить папку</string>
+    <string name="settings_remove_folder">Вернуть папку в библиотеку</string>
+    <string name="settings_folder_manual">Путь или его часть</string>
+    <string name="settings_folder_found">Папки с музыкой</string>
+    <string name="settings_playback">Воспроизведение</string>
+    <string name="settings_pause_on_disconnect">Пауза при отключении наушников</string>
+    <string name="settings_pause_on_disconnect_hint">Музыка не заиграет из динамика, если выдернуть наушники</string>
+    <string name="settings_resume_bluetooth">Продолжать при подключении Bluetooth</string>
+    <string name="settings_resume_bluetooth_hint">Воспроизведение возобновится, когда подключится гарнитура</string>
+    <string name="about">О приложении</string>
+    <string name="about_version">Версия %1$s (%2$d)</string>
+    <string name="about_text">Плеер для музыки на устройстве. Работает без интернета.</string>
+    <string name="about_licenses">Лицензии открытых библиотек</string>
+    <string name="license_apache2">Apache License 2.0</string>
 </resources>

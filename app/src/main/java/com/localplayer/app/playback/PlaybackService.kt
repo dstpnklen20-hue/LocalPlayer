@@ -52,6 +52,7 @@ class PlaybackService : MediaSessionService() {
     @Inject lateinit var mediaStoreRepository: MediaStoreRepository
     @Inject lateinit var settingsRepository: SettingsRepository
     @Inject lateinit var playlistRepository: PlaylistRepository
+    @Inject lateinit var sleepTimer: SleepTimer
 
     @Inject @ApplicationScope
     lateinit var appScope: CoroutineScope
@@ -82,6 +83,7 @@ class PlaybackService : MediaSessionService() {
             .setWakeMode(C.WAKE_MODE_LOCAL)
             .build()
         player.addListener(PlayerListener())
+        sleepTimer.attach(player)
 
         val sessionActivity = PendingIntent.getActivity(
             this,
@@ -129,6 +131,7 @@ class PlaybackService : MediaSessionService() {
 
     override fun onDestroy() {
         saveSession()
+        sleepTimer.detach()
         audioDeviceCallback?.let { getSystemService(AudioManager::class.java).unregisterAudioDeviceCallback(it) }
         mediaSession?.run {
             player.release()

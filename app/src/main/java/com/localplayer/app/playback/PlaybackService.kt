@@ -157,6 +157,7 @@ class PlaybackService : MediaSessionService() {
         val startIndex = if (index >= 0) index else 0
         val position = if (index >= 0) saved.positionMs else 0L
         player.setMediaItems(tracks.map { it.toMediaItem() }, startIndex, position)
+        // TODO: сохранять и сам порядок перемешивания — сейчас после перезапуска он генерируется заново
         player.shuffleModeEnabled = saved.shuffle
         player.repeatMode = saved.repeatMode
         player.playWhenReady = false // без автозапуска

@@ -6,7 +6,10 @@ import androidx.compose.runtime.Immutable
 import androidx.core.content.ContextCompat
 import androidx.media3.common.C
 import androidx.media3.common.MediaItem
-import androidx.media3.common.PlaybackException
+import android.os.Bundle
+import androidx.media3.session.SessionCommand
+import androidx.media3.session.SessionResult
+import com.google.common.util.concurrent.Futures
 import androidx.media3.common.Player
 import androidx.media3.common.Timeline
 import androidx.media3.session.MediaController
@@ -89,16 +92,26 @@ class PlayerConnection @Inject constructor(
             ))
         }
 
-        override fun onPlayerError(error: PlaybackException) {
-            val title = controllerFlow.value?.mediaMetadata?.title?.toString().orEmpty()
-            _errors.tryEmit(PlaybackErrorEvent(title))
+    }
+
+    /** Ошибки воспроизведения приходят от сервиса кастомной командой (см. PlaybackEvents). */
+    private val controllerListener = object : MediaController.Listener {
+        override fun onCustomCommand(
+            controller: MediaController,
+            command: SessionCommand,
+            args: Bundle,
+        ): ListenableFuture<SessionResult> {
+            if (command.customAction == PlaybackEvents.ACTION_PLAYBACK_ERROR) {
+                _errors.tryEmit(PlaybackErrorEvent(args.getString(PlaybackEvents.EXTRA_TITLE).orEmpty()))
+            }
+            return Futures.immediateFuture(SessionResult(SessionResult.RESULT_SUCCESS))
         }
     }
 
     fun connect() {
         if (controllerFuture != null) return
         val token = SessionToken(context, ComponentName(context, PlaybackService::class.java))
-        val future = MediaController.Builder(context, token).buildAsync()
+        val future = MediaController.Builder(context, token).setListener(controllerListener).buildAsync()
         controllerFuture = future
         future.addListener({
             val controller = runCatching { future.get() }.getOrNull() ?: return@addListener

@@ -1,6 +1,7 @@
 package com.localplayer.app.playback
 
 import android.app.PendingIntent
+import android.os.Bundle
 import android.content.Intent
 import android.media.AudioDeviceCallback
 import android.media.AudioDeviceInfo
@@ -18,6 +19,7 @@ import androidx.media3.exoplayer.ExoPlayer
 import androidx.media3.session.CacheBitmapLoader
 import androidx.media3.session.MediaSession
 import androidx.media3.session.MediaSessionService
+import androidx.media3.session.SessionCommand
 import com.google.common.util.concurrent.Futures
 import com.google.common.util.concurrent.ListenableFuture
 import com.localplayer.app.MainActivity
@@ -259,6 +261,12 @@ class PlaybackService : MediaSessionService() {
 
         /** Битый или удалённый файл: переходим к следующему, но не более 3 ошибок подряд. */
         override fun onPlayerError(error: PlaybackException) {
+            // Состояние ошибки сразу сбрасываем переходом дальше, поэтому сообщаем UI явным событием
+            val title = player.currentMediaItem?.mediaMetadata?.title?.toString().orEmpty()
+            mediaSession?.broadcastCustomCommand(
+                SessionCommand(PlaybackEvents.ACTION_PLAYBACK_ERROR, Bundle.EMPTY),
+                Bundle().apply { putString(PlaybackEvents.EXTRA_TITLE, title) },
+            )
             consecutiveErrors++
             if (consecutiveErrors < MAX_CONSECUTIVE_ERRORS && player.hasNextMediaItem()) {
                 player.seekToNextMediaItem()

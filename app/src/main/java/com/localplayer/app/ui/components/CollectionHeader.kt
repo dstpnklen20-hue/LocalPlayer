@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
@@ -74,16 +75,19 @@ fun CollectionHeader(
             textAlign = TextAlign.Center,
         )
         Spacer(Modifier.height(16.dp))
-        Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-            Button(onClick = onPlay, enabled = playEnabled, modifier = Modifier.width(150.dp)) {
+        Row(
+            modifier = Modifier.fillMaxWidth().widthIn(max = 420.dp),
+            horizontalArrangement = Arrangement.spacedBy(12.dp),
+        ) {
+            Button(onClick = onPlay, enabled = playEnabled, modifier = Modifier.weight(1f)) {
                 Icon(Icons.Rounded.PlayArrow, contentDescription = null, modifier = Modifier.size(ButtonDefaults.IconSize))
                 Spacer(Modifier.width(ButtonDefaults.IconSpacing))
-                Text(stringResource(R.string.action_play))
+                Text(stringResource(R.string.action_play), maxLines = 1)
             }
-            FilledTonalButton(onClick = onShuffle, enabled = playEnabled, modifier = Modifier.width(150.dp)) {
+            FilledTonalButton(onClick = onShuffle, enabled = playEnabled, modifier = Modifier.weight(1f)) {
                 Icon(Icons.Rounded.Shuffle, contentDescription = null, modifier = Modifier.size(ButtonDefaults.IconSize))
                 Spacer(Modifier.width(ButtonDefaults.IconSpacing))
-                Text(stringResource(R.string.action_shuffle))
+                Text(stringResource(R.string.action_shuffle), maxLines = 1)
             }
         }
         Spacer(Modifier.height(8.dp))

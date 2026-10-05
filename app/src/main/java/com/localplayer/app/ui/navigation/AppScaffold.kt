@@ -75,6 +75,7 @@ fun AppScaffold(playerViewModel: PlayerViewModel = hiltViewModel()) {
     var playerExpanded by rememberSaveable { mutableStateOf(false) }
     var queueVisible by rememberSaveable { mutableStateOf(false) }
     val snackbarHostState = remember { SnackbarHostState() }
+    val isFavorite by playerViewModel.isFavorite.collectAsStateWithLifecycle()
 
     LaunchedEffect(playerViewModel) {
         playerViewModel.errors.collect { event ->
@@ -173,7 +174,10 @@ fun AppScaffold(playerViewModel: PlayerViewModel = hiltViewModel()) {
                             playerExpanded = false
                             navController.navigate(ArtistRoute(playerState.artist))
                         },
-                        extras = PlayerExtras(),
+                        extras = PlayerExtras(
+                            isFavorite = isFavorite,
+                            onToggleFavorite = playerViewModel::toggleFavorite,
+                        ),
                     )
                 }
             }

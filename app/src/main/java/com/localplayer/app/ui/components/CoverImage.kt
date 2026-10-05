@@ -20,6 +20,20 @@ import androidx.compose.ui.unit.dp
 import coil3.compose.AsyncImage
 import com.localplayer.app.ui.components.cover.AudioCover
 
+/** Квадрат-заглушка с иконкой (например, для недоступного трека). */
+@Composable
+fun CoverPlaceholderBox(icon: androidx.compose.ui.graphics.vector.ImageVector, modifier: Modifier = Modifier) {
+    Box(
+        modifier = modifier
+            .fillMaxSize()
+            .clip(RoundedCornerShape(8.dp))
+            .background(MaterialTheme.colorScheme.surfaceContainerHighest),
+        contentAlignment = Alignment.Center,
+    ) {
+        Icon(icon, contentDescription = null, tint = MaterialTheme.colorScheme.onSurfaceVariant)
+    }
+}
+
 /**
  * Обложка трека/альбома. Под картинкой всегда лежит заглушка с нотой:
  * пока обложка грузится или если её нет, видна заглушка (без subcomposition — быстро в списках).

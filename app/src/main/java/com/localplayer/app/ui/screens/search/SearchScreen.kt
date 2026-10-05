@@ -39,7 +39,7 @@ import com.localplayer.app.ui.components.LocalCurrentTrackId
 import com.localplayer.app.ui.components.LocalPlaybackActions
 import com.localplayer.app.ui.components.TrackRow
 import com.localplayer.app.ui.screens.detail.SectionTitle
-import com.localplayer.app.ui.screens.library.TrackMenuSlot
+import com.localplayer.app.ui.actions.TrackMenuButton
 import com.localplayer.app.ui.screens.library.artistSubtitle
 
 @Composable
@@ -125,7 +125,7 @@ fun SearchScreen(
                             track = track,
                             isCurrent = track.id == currentId,
                             onClick = { playback.play(results.tracks, i) },
-                            trailing = { TrackMenuSlot(track) },
+                            trailing = { TrackMenuButton(track) },
                         )
                     }
                 }

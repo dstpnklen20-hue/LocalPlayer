@@ -18,6 +18,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.pluralStringResource
@@ -27,29 +28,35 @@ import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.localplayer.app.R
 import com.localplayer.app.data.model.Track
+import com.localplayer.app.ui.actions.SelectableTrackRow
+import com.localplayer.app.ui.actions.SelectionTopBar
+import com.localplayer.app.ui.actions.TrackSelection
 import com.localplayer.app.ui.components.AlbumCard
 import com.localplayer.app.ui.components.CollectionHeader
 import com.localplayer.app.ui.components.DetailTopBar
 import com.localplayer.app.ui.components.EmptyState
-import com.localplayer.app.ui.components.LocalCurrentTrackId
 import com.localplayer.app.ui.components.LocalPlaybackActions
-import com.localplayer.app.ui.components.TrackRow
-import com.localplayer.app.ui.screens.library.TrackMenuSlot
 import com.localplayer.app.ui.screens.library.artistSubtitle
 import com.localplayer.app.ui.screens.library.folderContent
 import com.localplayer.app.util.formatDuration
 
-/** Общая обвязка: панель, загрузка, «не найдено», список. */
+/** Общая обвязка: панель (или панель выбора), загрузка, «не найдено», список. */
 @Composable
 private fun <T> DetailScaffold(
     title: String,
     state: DetailState<T>,
     onBack: () -> Unit,
+    selection: TrackSelection,
+    allTracks: (T) -> List<Track>,
     content: LazyListScope.(T) -> Unit,
 ) {
     Column(Modifier.fillMaxSize()) {
-        DetailTopBar(title = title, onBack = onBack)
         val item = state.item
+        if (selection.isActive && item != null) {
+            SelectionTopBar(selection, allTracks(item))
+        } else {
+            DetailTopBar(title = title, onBack = onBack)
+        }
         when {
             state.loading -> Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
                 CircularProgressIndicator()
@@ -66,11 +73,17 @@ private fun <T> DetailScaffold(
 
 /** Альбом: треки по номеру. */
 @Composable
-fun AlbumScreen(onBack: () -> Unit, onArtist: (String) -> Unit, viewModel: AlbumViewModel = hiltViewModel()) {
+fun AlbumScreen(onBack: () -> Unit, viewModel: AlbumViewModel = hiltViewModel()) {
     val state by viewModel.state.collectAsStateWithLifecycle()
     val playback = LocalPlaybackActions.current
-    val currentId = LocalCurrentTrackId.current
-    DetailScaffold(title = state.item?.title.orEmpty(), state = state, onBack = onBack) { album ->
+    val selection = remember { TrackSelection() }
+    DetailScaffold(
+        title = state.item?.title.orEmpty(),
+        state = state,
+        onBack = onBack,
+        selection = selection,
+        allTracks = { it.tracks },
+    ) { album ->
         item(key = "header") {
             val info = listOfNotNull(
                 album.year.takeIf { it > 0 }?.toString(),
@@ -85,7 +98,7 @@ fun AlbumScreen(onBack: () -> Unit, onArtist: (String) -> Unit, viewModel: Album
                 onShuffle = { playback.play(album.tracks, shuffle = true) },
             )
         }
-        trackItems(album.tracks, currentId, numbered = true) { i -> playback.play(album.tracks, i) }
+        trackItems(album.tracks, selection, numbered = true)
     }
 }
 
@@ -94,8 +107,14 @@ fun AlbumScreen(onBack: () -> Unit, onArtist: (String) -> Unit, viewModel: Album
 fun ArtistScreen(onBack: () -> Unit, onAlbum: (Long) -> Unit, viewModel: ArtistViewModel = hiltViewModel()) {
     val state by viewModel.state.collectAsStateWithLifecycle()
     val playback = LocalPlaybackActions.current
-    val currentId = LocalCurrentTrackId.current
-    DetailScaffold(title = state.item?.artist?.name.orEmpty(), state = state, onBack = onBack) { detail ->
+    val selection = remember { TrackSelection() }
+    DetailScaffold(
+        title = state.item?.artist?.name.orEmpty(),
+        state = state,
+        onBack = onBack,
+        selection = selection,
+        allTracks = { it.artist.tracks },
+    ) { detail ->
         val tracks = detail.artist.tracks
         item(key = "header") {
             CollectionHeader(
@@ -118,7 +137,7 @@ fun ArtistScreen(onBack: () -> Unit, onAlbum: (Long) -> Unit, viewModel: ArtistV
             }
             item(key = "tracks_title") { SectionTitle(stringResource(R.string.tab_tracks)) }
         }
-        trackItems(tracks, currentId) { i -> playback.play(tracks, i) }
+        trackItems(tracks, selection)
     }
 }
 
@@ -127,8 +146,14 @@ fun ArtistScreen(onBack: () -> Unit, onAlbum: (Long) -> Unit, viewModel: ArtistV
 fun FolderScreen(onBack: () -> Unit, onFolder: (String) -> Unit, viewModel: FolderViewModel = hiltViewModel()) {
     val state by viewModel.state.collectAsStateWithLifecycle()
     val playback = LocalPlaybackActions.current
-    val currentId = LocalCurrentTrackId.current
-    DetailScaffold(title = state.item?.name.orEmpty(), state = state, onBack = onBack) { folder ->
+    val selection = remember { TrackSelection() }
+    DetailScaffold(
+        title = state.item?.name.orEmpty(),
+        state = state,
+        onBack = onBack,
+        selection = selection,
+        allTracks = { it.tracks },
+    ) { folder ->
         item(key = "header") {
             val all = folder.allTracks()
             CollectionHeader(
@@ -141,25 +166,21 @@ fun FolderScreen(onBack: () -> Unit, onFolder: (String) -> Unit, viewModel: Fold
                 onShuffle = { playback.play(all, shuffle = true) },
             )
         }
-        folderContent(folder, onFolder, currentId, onPlay = { tracks, i -> playback.play(tracks, i) })
+        folderContent(folder, onFolder, selection)
     }
 }
 
 fun LazyListScope.trackItems(
     tracks: List<Track>,
-    currentTrackId: Long?,
+    selection: TrackSelection?,
     numbered: Boolean = false,
-    onClick: (Int) -> Unit,
 ) {
     itemsIndexed(tracks, key = { _, t -> t.id }) { i, track ->
-        TrackRow(
-            track = track,
-            isCurrent = track.id == currentTrackId,
-            onClick = { onClick(i) },
-            number = if (numbered) track.trackNumber else null,
-            subtitle = if (numbered) formatDuration(track.durationMs) else "${track.artist} · ${formatDuration(track.durationMs)}",
-            trailing = { TrackMenuSlot(track) },
-        )
+        if (numbered) {
+            SelectableTrackRow(track, tracks, i, selection, number = track.trackNumber, subtitle = formatDuration(track.durationMs))
+        } else {
+            SelectableTrackRow(track, tracks, i, selection)
+        }
     }
 }
 

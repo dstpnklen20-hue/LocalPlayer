@@ -87,4 +87,69 @@
     <string name="favorite_add">Добавить в избранное</string>
     <string name="favorite_remove">Убрать из избранного</string>
     <string name="sleep_timer">Таймер сна</string>
+
+    <!-- Действия с треком -->
+    <string name="action_more">Ещё</string>
+    <string name="action_play_next">Играть следующим</string>
+    <string name="action_add_to_queue">Добавить в очередь</string>
+    <string name="action_add_to_playlist">Добавить в плейлист</string>
+    <string name="action_go_to_album">Перейти к альбому</string>
+    <string name="action_go_to_artist">Перейти к исполнителю</string>
+    <string name="action_details">Подробнее</string>
+    <string name="action_share">Поделиться</string>
+    <string name="action_delete_file">Удалить с устройства</string>
+    <string name="action_select_all">Выбрать все</string>
+    <string name="action_remove_from_playlist">Убрать из плейлиста</string>
+    <string name="selected_count">Выбрано: %d</string>
+    <string name="selection_cancel">Отменить выбор</string>
+    <string name="msg_added_to_playlist">Добавлено в «%1$s»</string>
+    <plurals name="msg_play_next">
+        <item quantity="one">%d трек будет следующим</item>
+        <item quantity="few">%d трека будут следующими</item>
+        <item quantity="many">%d треков будут следующими</item>
+        <item quantity="other">%d трека будут следующими</item>
+    </plurals>
+    <plurals name="msg_added_to_queue">
+        <item quantity="one">%d трек добавлен в очередь</item>
+        <item quantity="few">%d трека добавлены в очередь</item>
+        <item quantity="many">%d треков добавлено в очередь</item>
+        <item quantity="other">%d трека добавлено в очередь</item>
+    </plurals>
+    <plurals name="msg_deleted">
+        <item quantity="one">%d файл удалён</item>
+        <item quantity="few">%d файла удалено</item>
+        <item quantity="many">%d файлов удалено</item>
+        <item quantity="other">%d файла удалено</item>
+    </plurals>
+    <string name="details_artist">Исполнитель</string>
+    <string name="details_album">Альбом</string>
+    <string name="details_year">Год</string>
+    <string name="details_duration">Длительность</string>
+    <string name="details_format">Формат</string>
+    <string name="details_bitrate">Битрейт</string>
+    <string name="details_kbps">%d кбит/с</string>
+    <string name="details_size">Размер</string>
+    <string name="details_path">Путь</string>
+
+    <!-- Плейлисты -->
+    <string name="playlist_new">Новый плейлист</string>
+    <string name="playlist_name">Название</string>
+    <string name="playlist_rename">Переименовать</string>
+    <string name="playlist_delete">Удалить плейлист</string>
+    <string name="playlist_delete_confirm">Плейлист «%1$s» будет удалён. Сами треки останутся на устройстве.</string>
+    <string name="delete">Удалить</string>
+    <string name="playlist_favorites">Избранное</string>
+    <string name="playlist_recent">Недавно добавленные</string>
+    <string name="playlist_most_played">Часто слушаю</string>
+    <string name="playlists_auto">Автоплейлисты</string>
+    <string name="playlists_mine">Мои плейлисты</string>
+    <string name="playlists_empty_title">Плейлистов пока нет</string>
+    <string name="playlists_empty_hint">Нажмите «+», чтобы создать первый, или добавьте трек через меню «⋮».</string>
+    <string name="playlist_empty_title">Плейлист пуст</string>
+    <string name="playlist_empty_hint">Добавляйте треки через меню «⋮» в библиотеке.</string>
+    <string name="favorites_empty_hint">Нажмите на сердечко в плеере, чтобы добавить трек в избранное.</string>
+    <string name="recent_empty_hint">За последние 30 дней новых треков не было.</string>
+    <string name="most_played_empty_hint">Трек попадает сюда, когда прослушан хотя бы наполовину.</string>
+    <string name="track_unavailable">Файл недоступен</string>
+    <string name="track_unavailable_hint">Удалён или перемещён</string>
 </resources>

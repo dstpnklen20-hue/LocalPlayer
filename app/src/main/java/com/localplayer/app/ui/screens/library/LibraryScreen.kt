@@ -3,6 +3,8 @@ package com.localplayer.app.ui.screens.library
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
@@ -34,6 +36,7 @@ import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
@@ -54,9 +57,9 @@ import com.localplayer.app.ui.components.AlphabetScroller
 import com.localplayer.app.ui.components.CollectionRow
 import com.localplayer.app.ui.components.EmptyState
 import com.localplayer.app.ui.components.IndexEntry
-import com.localplayer.app.ui.components.LocalCurrentTrackId
-import com.localplayer.app.ui.components.LocalPlaybackActions
-import com.localplayer.app.ui.components.TrackRow
+import com.localplayer.app.ui.actions.SelectableTrackRow
+import com.localplayer.app.ui.actions.SelectionTopBar
+import com.localplayer.app.ui.actions.TrackSelection
 import kotlinx.coroutines.launch
 
 private enum class LibraryTab(val title: Int) {
@@ -80,9 +83,12 @@ fun LibraryScreen(
     val pagerState = rememberPagerState { LibraryTab.entries.size }
     val scope = rememberCoroutineScope()
     var showSort by rememberSaveable { mutableStateOf(false) }
+    val selection = remember { TrackSelection() }
 
     Column(Modifier.fillMaxSize()) {
-        TopAppBar(
+        if (selection.isActive) {
+            SelectionTopBar(selection, state.tracks)
+        } else TopAppBar(
             title = { Text(stringResource(R.string.nav_library)) },
             actions = {
                 IconButton(onClick = onSearch) {
@@ -119,10 +125,10 @@ fun LibraryScreen(
                 state.tracks.isEmpty() -> EmptyLibrary()
                 else -> HorizontalPager(state = pagerState, modifier = Modifier.fillMaxSize()) { page ->
                     when (LibraryTab.entries[page]) {
-                        LibraryTab.TRACKS -> TracksTab(state.tracks, state.trackIndex)
+                        LibraryTab.TRACKS -> TracksTab(state.tracks, state.trackIndex, selection)
                         LibraryTab.ALBUMS -> AlbumsTab(state.albums, onAlbum)
                         LibraryTab.ARTISTS -> ArtistsTab(state.artists, state.artistIndex, onArtist)
-                        LibraryTab.FOLDERS -> FoldersTab(state.folderRoot, onFolder)
+                        LibraryTab.FOLDERS -> FoldersTab(state.folderRoot, onFolder, selection)
                     }
                 }
             }
@@ -154,25 +160,17 @@ private fun EmptyLibrary() {
 }
 
 @Composable
-private fun TracksTab(tracks: List<Track>, index: List<IndexEntry>) {
+private fun TracksTab(tracks: List<Track>, index: List<IndexEntry>, selection: TrackSelection) {
     val listState = rememberLazyListState()
-    val playback = LocalPlaybackActions.current
-    val currentId = LocalCurrentTrackId.current
-    Box(Modifier.fillMaxSize()) {
-        LazyColumn(state = listState, modifier = Modifier.fillMaxSize()) {
+    Row(Modifier.fillMaxSize()) {
+        LazyColumn(state = listState, modifier = Modifier.weight(1f).fillMaxHeight()) {
             itemsIndexed(tracks, key = { _, t -> t.id }) { i, track ->
-                TrackRow(
-                    track = track,
-                    isCurrent = track.id == currentId,
-                    onClick = { playback.play(tracks, i) },
-                    trailing = { TrackMenuSlot(track) },
-                )
+                SelectableTrackRow(track, tracks, i, selection)
             }
         }
         AlphabetScroller(
             entries = index,
             onScrollTo = { listState.scrollToItem(it) },
-            modifier = Modifier.align(Alignment.CenterEnd),
         )
     }
 }
@@ -196,8 +194,8 @@ private fun AlbumsTab(albums: List<Album>, onAlbum: (Long) -> Unit) {
 @Composable
 private fun ArtistsTab(artists: List<Artist>, index: List<IndexEntry>, onArtist: (String) -> Unit) {
     val listState = rememberLazyListState()
-    Box(Modifier.fillMaxSize()) {
-        LazyColumn(state = listState, modifier = Modifier.fillMaxSize()) {
+    Row(Modifier.fillMaxSize()) {
+        LazyColumn(state = listState, modifier = Modifier.weight(1f).fillMaxHeight()) {
             items(artists, key = { it.name }) { artist ->
                 CollectionRow(
                     title = artist.name,
@@ -211,7 +209,6 @@ private fun ArtistsTab(artists: List<Artist>, index: List<IndexEntry>, onArtist:
         AlphabetScroller(
             entries = index,
             onScrollTo = { listState.scrollToItem(it) },
-            modifier = Modifier.align(Alignment.CenterEnd),
         )
     }
 }
@@ -222,12 +219,10 @@ fun artistSubtitle(artist: Artist): String =
         pluralStringResource(R.plurals.tracks_count, artist.tracks.size, artist.tracks.size)
 
 @Composable
-private fun FoldersTab(root: FolderNode?, onFolder: (String) -> Unit) {
+private fun FoldersTab(root: FolderNode?, onFolder: (String) -> Unit, selection: TrackSelection) {
     if (root == null) return
-    val playback = LocalPlaybackActions.current
-    val currentId = LocalCurrentTrackId.current
     LazyColumn(Modifier.fillMaxSize()) {
-        folderContent(root, onFolder, currentId, onPlay = { tracks, i -> playback.play(tracks, i) })
+        folderContent(root, onFolder, selection)
     }
 }
 
@@ -235,8 +230,7 @@ private fun FoldersTab(root: FolderNode?, onFolder: (String) -> Unit) {
 fun androidx.compose.foundation.lazy.LazyListScope.folderContent(
     folder: FolderNode,
     onFolder: (String) -> Unit,
-    currentTrackId: Long?,
-    onPlay: (List<Track>, Int) -> Unit,
+    selection: TrackSelection?,
 ) {
     items(folder.subfolders, key = { "dir:" + it.path }) { sub ->
         CollectionRow(
@@ -255,20 +249,10 @@ fun androidx.compose.foundation.lazy.LazyListScope.folderContent(
         )
     }
     itemsIndexed(folder.tracks, key = { _, t -> t.id }) { i, track ->
-        TrackRow(
-            track = track,
-            isCurrent = track.id == currentTrackId,
-            onClick = { onPlay(folder.tracks, i) },
-            trailing = { TrackMenuSlot(track) },
-        )
+        SelectableTrackRow(track, folder.tracks, i, selection)
     }
 }
 
 @Composable
 private fun folderSubtitle(folder: FolderNode): String =
     pluralStringResource(R.plurals.tracks_count, folder.totalTracks, folder.totalTracks)
-
-/** Место для меню «⋮» трека; наполняется на этапе 4. */
-@Suppress("UNUSED_PARAMETER")
-@Composable
-fun TrackMenuSlot(track: Track) = Unit

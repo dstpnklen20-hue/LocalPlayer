@@ -21,6 +21,7 @@ import androidx.media3.session.MediaSessionService
 import com.google.common.util.concurrent.Futures
 import com.google.common.util.concurrent.ListenableFuture
 import com.localplayer.app.MainActivity
+import com.localplayer.app.data.PlaylistRepository
 import com.localplayer.app.data.mediastore.MediaStoreRepository
 import com.localplayer.app.data.prefs.SessionRepository
 import com.localplayer.app.data.prefs.SettingsRepository
@@ -50,6 +51,7 @@ class PlaybackService : MediaSessionService() {
     @Inject lateinit var sessionRepository: SessionRepository
     @Inject lateinit var mediaStoreRepository: MediaStoreRepository
     @Inject lateinit var settingsRepository: SettingsRepository
+    @Inject lateinit var playlistRepository: PlaylistRepository
 
     @Inject @ApplicationScope
     lateinit var appScope: CoroutineScope
@@ -60,6 +62,8 @@ class PlaybackService : MediaSessionService() {
 
     private var consecutiveErrors = 0
     private var queueDirty = true
+    /** Прослушивание текущего трека уже засчитано (сбрасывается при смене/повторе трека). */
+    private var playCounted = false
     private var restoreJob: Job? = null
     private var resumeOnBluetooth = false
     private var audioDeviceCallback: AudioDeviceCallback? = null
@@ -95,6 +99,22 @@ class PlaybackService : MediaSessionService() {
         registerBluetoothCallback()
         restoreJob = scope.launch { restoreSession() }
         startPeriodicSave()
+        startPlayCounter()
+    }
+
+    /** F17: прослушивание засчитывается после 50% длительности. */
+    private fun startPlayCounter() {
+        scope.launch {
+            while (isActive) {
+                delay(PLAY_COUNT_CHECK_MS)
+                val duration = player.duration
+                if (!playCounted && player.isPlaying && duration > 0 && player.currentPosition * 2 >= duration) {
+                    playCounted = true
+                    val trackId = player.currentMediaItem?.trackId ?: continue
+                    appScope.launch { playlistRepository.recordPlay(trackId) }
+                }
+            }
+        }
     }
 
     override fun onGetSession(controllerInfo: MediaSession.ControllerInfo): MediaSession? = mediaSession
@@ -221,6 +241,7 @@ class PlaybackService : MediaSessionService() {
         }
 
         override fun onMediaItemTransition(mediaItem: MediaItem?, reason: Int) {
+            playCounted = false
             saveSession()
         }
 
@@ -280,5 +301,6 @@ class PlaybackService : MediaSessionService() {
     private companion object {
         const val SAVE_INTERVAL_MS = 5_000L
         const val MAX_CONSECUTIVE_ERRORS = 3
+        const val PLAY_COUNT_CHECK_MS = 2_000L
     }
 }

@@ -5,11 +5,14 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import com.localplayer.app.R
+import com.localplayer.app.ui.actions.TrackActionsHost
 import com.localplayer.app.ui.screens.PlaceholderScreen
 import com.localplayer.app.ui.screens.detail.AlbumScreen
 import com.localplayer.app.ui.screens.detail.ArtistScreen
 import com.localplayer.app.ui.screens.detail.FolderScreen
 import com.localplayer.app.ui.screens.library.LibraryScreen
+import com.localplayer.app.ui.screens.playlists.PlaylistDetailScreen
+import com.localplayer.app.ui.screens.playlists.PlaylistsScreen
 import com.localplayer.app.ui.screens.search.SearchScreen
 
 @Composable
@@ -19,6 +22,7 @@ fun AppNavHost(navController: NavHostController) {
     val onFolder: (String) -> Unit = { navController.navigate(FolderRoute(it)) }
     val onBack: () -> Unit = { navController.popBackStack() }
 
+    TrackActionsHost(onNavigateToAlbum = onAlbum, onNavigateToArtist = onArtist) {
     NavHost(navController = navController, startDestination = LibraryRoute) {
         composable<LibraryRoute> {
             LibraryScreen(
@@ -29,11 +33,13 @@ fun AppNavHost(navController: NavHostController) {
                 onFolder = onFolder,
             )
         }
-        composable<PlaylistsRoute> { PlaceholderScreen(R.string.nav_playlists) }
+        composable<PlaylistsRoute> { PlaylistsScreen(onPlaylist = { navController.navigate(PlaylistRoute(it)) }) }
+        composable<PlaylistRoute> { PlaylistDetailScreen(onBack = onBack) }
         composable<SearchRoute> { SearchScreen(onAlbum = onAlbum, onArtist = onArtist) }
         composable<SettingsRoute> { PlaceholderScreen(R.string.settings, onBack = onBack) }
-        composable<AlbumRoute> { AlbumScreen(onBack = onBack, onArtist = onArtist) }
+        composable<AlbumRoute> { AlbumScreen(onBack = onBack) }
         composable<ArtistRoute> { ArtistScreen(onBack = onBack, onAlbum = onAlbum) }
         composable<FolderRoute> { FolderScreen(onBack = onBack, onFolder = onFolder) }
+    }
     }
 }

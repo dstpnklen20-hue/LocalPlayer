@@ -9,6 +9,7 @@ import androidx.compose.foundation.gestures.detectHorizontalDragGestures
 import androidx.compose.foundation.gestures.detectVerticalDragGestures
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -21,7 +22,9 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.safeDrawingPadding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.widthIn
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.rounded.QueueMusic
 import androidx.compose.material.icons.rounded.Bedtime
@@ -158,14 +161,18 @@ fun FullPlayer(
             if (isWideLayout()) {
                 // Планшет / альбомная ориентация: обложка слева, управление справа
                 Row(
-                    Modifier.fillMaxSize().padding(24.dp),
+                    Modifier.fillMaxSize().padding(horizontal = 24.dp, vertical = 8.dp),
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.spacedBy(32.dp),
                 ) {
                     Box(Modifier.weight(1f).fillMaxHeight(), contentAlignment = Alignment.Center) {
                         SwipeableCover(state.currentTrackId, onNext, onPrevious)
                     }
-                    Column(Modifier.weight(1f), verticalArrangement = Arrangement.Center) {
+                    // На низком экране (телефон боком) контролы можно прокрутить
+                    Column(
+                        Modifier.weight(1f).verticalScroll(rememberScrollState()),
+                        verticalArrangement = Arrangement.Center,
+                    ) {
                         PlayerControls(state, positionMs, onTogglePlay, onNext, onPrevious, onSeek, onToggleShuffle, onCycleRepeat, onOpenQueue, onArtistClick, extras)
                     }
                 }
@@ -190,37 +197,39 @@ fun FullPlayer(
 private fun SwipeableCover(trackId: Long?, onNext: () -> Unit, onPrevious: () -> Unit) {
     val offset = remember { Animatable(0f) }
     val scope = rememberCoroutineScope()
-    CoverImage(
-        trackId = trackId,
-        modifier = Modifier
-            .widthIn(max = 420.dp)
-            .fillMaxWidth()
-            .aspectRatio(1f)
-            .graphicsLayer {
-                translationX = offset.value
-                alpha = 1f - (abs(offset.value) / (size.width * 1.5f)).coerceIn(0f, 0.6f)
-            }
-            .pointerInput(Unit) {
-                detectHorizontalDragGestures(
-                    onDragEnd = {
-                        val threshold = 80.dp.toPx()
-                        val value = offset.value
-                        when {
-                            value < -threshold -> onNext()
-                            value > threshold -> onPrevious()
-                        }
-                        scope.launch { offset.animateTo(0f) }
-                    },
-                    onDragCancel = { scope.launch { offset.animateTo(0f) } },
-                    onHorizontalDrag = { change, dx ->
-                        change.consume()
-                        scope.launch { offset.snapTo(offset.value + dx) }
-                    },
-                )
-            },
-        shape = RoundedCornerShape(20.dp),
-        iconSize = 96.dp,
-    )
+    // Квадрат по меньшей стороне доступной области — не вылезает ни по ширине, ни по высоте
+    BoxWithConstraints(contentAlignment = Alignment.Center) {
+        val side = minOf(maxWidth, maxHeight, 420.dp)
+        CoverImage(
+            trackId = trackId,
+            modifier = Modifier
+                .size(side)
+                .graphicsLayer {
+                    translationX = offset.value
+                    alpha = 1f - (abs(offset.value) / (size.width * 1.5f)).coerceIn(0f, 0.6f)
+                }
+                .pointerInput(Unit) {
+                    detectHorizontalDragGestures(
+                        onDragEnd = {
+                            val threshold = 80.dp.toPx()
+                            val value = offset.value
+                            when {
+                                value < -threshold -> onNext()
+                                value > threshold -> onPrevious()
+                            }
+                            scope.launch { offset.animateTo(0f) }
+                        },
+                        onDragCancel = { scope.launch { offset.animateTo(0f) } },
+                        onHorizontalDrag = { change, dx ->
+                            change.consume()
+                            scope.launch { offset.snapTo(offset.value + dx) }
+                        },
+                    )
+                },
+            shape = RoundedCornerShape(20.dp),
+            iconSize = 96.dp,
+        )
+    }
 }
 
 @Composable

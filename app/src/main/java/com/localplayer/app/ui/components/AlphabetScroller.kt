@@ -24,6 +24,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
@@ -101,7 +102,13 @@ fun AlphabetScroller(
                 },
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
-            entries.forEach { entry ->
+            // Если все буквы не влезают по высоте, показываем каждую k-ю;
+            // касание всё равно пропорционально попадает в любую букву
+            val density = LocalDensity.current
+            val fits = with(density) { (columnHeight / MIN_LETTER_HEIGHT.toPx()).toInt() }.coerceAtLeast(2)
+            val step = (entries.size + fits - 1) / fits
+            val shown = if (step <= 1) entries else entries.filterIndexed { i, _ -> i % step == 0 }
+            shown.forEach { entry ->
                 Box(Modifier.weight(1f), contentAlignment = Alignment.Center) {
                     Text(
                         text = entry.letter,
@@ -131,3 +138,5 @@ fun AlphabetScroller(
         }
     }
 }
+
+private val MIN_LETTER_HEIGHT = 14.dp
